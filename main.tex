@@ -11,22 +11,31 @@
 \usepackage{graphicx}
 \usepackage{tabularx}
 \usepackage{tikz}
-\usepackage{fontspec}
-\usepackage{xeCJK}
+\usepackage{iftex}
 \usetikzlibrary{positioning,arrows.meta}
 
-\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{TeX Gyre Termes}}
-\IfFontExistsTF{Arial}{\setsansfont{Arial}}{\setsansfont{TeX Gyre Heros}}
-\IfFontExistsTF{STSong}{%
-  \setCJKmainfont{STSong}%
-}{%
-  \IfFontExistsTF{FandolSong-Regular}{\setCJKmainfont{FandolSong-Regular}}{\setCJKmainfont{Noto Serif CJK SC}}%
-}
-\IfFontExistsTF{PingFang SC}{%
-  \setCJKsansfont{PingFang SC}%
-}{%
-  \IfFontExistsTF{FandolHei-Regular}{\setCJKsansfont{FandolHei-Regular}}{\setCJKsansfont{Noto Sans CJK SC}}%
-}
+\ifPDFTeX
+  \usepackage[utf8]{inputenc}
+  \usepackage[T1]{fontenc}
+  \usepackage{CJKutf8}
+  \AtBeginDocument{\begin{CJK*}{UTF8}{gbsn}}
+  \AtEndDocument{\end{CJK*}}
+\else
+  \usepackage{fontspec}
+  \usepackage{xeCJK}
+  \IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{TeX Gyre Termes}}
+  \IfFontExistsTF{Arial}{\setsansfont{Arial}}{\setsansfont{TeX Gyre Heros}}
+  \IfFontExistsTF{STSong}{%
+    \setCJKmainfont{STSong}%
+  }{%
+    \IfFontExistsTF{FandolSong-Regular}{\setCJKmainfont{FandolSong-Regular}}{\setCJKmainfont{Noto Serif CJK SC}}%
+  }
+  \IfFontExistsTF{PingFang SC}{%
+    \setCJKsansfont{PingFang SC}%
+  }{%
+    \IfFontExistsTF{FandolHei-Regular}{\setCJKsansfont{FandolHei-Regular}}{\setCJKsansfont{Noto Sans CJK SC}}%
+  }
+\fi
 \renewcommand{\familydefault}{\sfdefault}
 \graphicspath{{figs/}}
 
