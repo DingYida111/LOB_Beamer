@@ -1,3 +1,4 @@
+% !TeX program = xelatex
 \documentclass[aspectratio=169,10pt]{beamer}
 
 \usetheme{default}
@@ -14,11 +15,18 @@
 \usepackage{xeCJK}
 \usetikzlibrary{positioning,arrows.meta}
 
-\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{Times}}
-\IfFontExistsTF{Arial}{\setsansfont{Arial}}{\setsansfont{Helvetica}}
-\IfFontExistsTF{STSong}{\setCJKmainfont{STSong}}{\setCJKmainfont{Songti SC}}
-\IfFontExistsTF{PingFang SC}{\setCJKsansfont{PingFang SC}}{\setCJKsansfont{STHeiti}}
-\setCJKmonofont{STHeiti}
+\IfFontExistsTF{Times New Roman}{\setmainfont{Times New Roman}}{\setmainfont{TeX Gyre Termes}}
+\IfFontExistsTF{Arial}{\setsansfont{Arial}}{\setsansfont{TeX Gyre Heros}}
+\IfFontExistsTF{STSong}{%
+  \setCJKmainfont{STSong}%
+}{%
+  \IfFontExistsTF{FandolSong-Regular}{\setCJKmainfont{FandolSong-Regular}}{\setCJKmainfont{Noto Serif CJK SC}}%
+}
+\IfFontExistsTF{PingFang SC}{%
+  \setCJKsansfont{PingFang SC}%
+}{%
+  \IfFontExistsTF{FandolHei-Regular}{\setCJKsansfont{FandolHei-Regular}}{\setCJKsansfont{Noto Sans CJK SC}}%
+}
 \renewcommand{\familydefault}{\sfdefault}
 \graphicspath{{figs/}}
 
