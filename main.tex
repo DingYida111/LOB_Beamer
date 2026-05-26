@@ -77,13 +77,13 @@
   \begin{tikzpicture}[remember picture,overlay]
     \fill[BrandOrange] (current page.south west) rectangle (current page.north east);
     \node[align=center,text=white,font=\bfseries\fontsize{22}{26}\selectfont] at ([yshift=0.65cm]current page.center) {Deep Limit Order Book Forecasting};
-    \node[align=center,text=white,font=\Large] at ([yshift=-0.22cm]current page.center) {以微观结构为主线的入门讲解};
+    \node[align=center,text=white,font=\Large] at ([yshift=-0.22cm]current page.center) {A Microstructure-First Introduction};
     \node[align=center,text=white,font=\normalsize] at ([yshift=-1.45cm]current page.center) {Yida Ding \quad \today};
   \end{tikzpicture}
 }
 
 \title{Deep Limit Order Book Forecasting}
-\subtitle{以微观结构为主线的入门讲}
+\subtitle{A Microstructure-First Introduction}
 \author{Yida Ding}
 \date{\today}
 
@@ -97,24 +97,24 @@
 
 \section{Roadmap}
 \begin{frame}[plain]
-\contentheader{简介}
+\contentheader{Opening Questions}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
-\begin{block}{思考题}
+\begin{block}{Keep these in mind}
 \begin{itemize}\tightitems
-  \item LOB 预测到底在预测什么？
-  \item 为什么 tick size、spread、horizon 会改变预测难度？
-  \item 为什么分类准确率高，不等于交易信号可用？
+  \item What exactly is a LOB forecasting model predicting?
+  \item Why do tick size, spread, and horizon change the difficulty?
+  \item Why can a classifier be accurate but still be weak as a trading signal?
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.48\textwidth}
 \centering
 \begin{tikzpicture}[node distance=0.62cm,every node/.style={font=\scriptsize}]
-\node[draw,rounded corners=2pt,fill=BrandOrangeLight,text width=4.7cm,align=center,inner sep=5pt] (a) {1. LOB 数学对象};
-\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of a] (b) {2. Microstructural Guide 主线};
-\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of b] (c) {3. DeepLOB 与其他论文旁证};
-\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of c] (d) {4. 如何用于自己的研究};
+\node[draw,rounded corners=2pt,fill=BrandOrangeLight,text width=4.7cm,align=center,inner sep=5pt] (a) {1. LOB as a mathematical object};
+\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of a] (b) {2. Stochastic microstructure};
+\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of b] (c) {3. DeepLOB and evaluation};
+\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of c] (d) {4. Answers and research logic};
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (a) -- (b);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (b) -- (c);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (c) -- (d);
@@ -124,17 +124,17 @@
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{相关论文}
+\contentheader{Papers and Roles}
 \scriptsize
 \begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{3.1cm}X>{\raggedright\arraybackslash}p{4.0cm}}
 \toprule
-论文 & 核心作用 & 本次讲法 \\
+Paper & Role & How we use it \\
 \midrule
-Microstructural Guide & 主论文：用市场微观结构解释 LOB 预测什么时候有效 & 重点讲数学对象、标签、tick regime、MCC、\(p_T\) \\
-DeepLOB & 经典模型：把 LOB 当作有局部结构的时间序列 & 讲模型思想，不展开工程细节 \\
-Ait-Sahalia et al. & 证明高频可预测性存在，但很快衰减 & 一页说明信号寿命 \\
-HLOB & 用图结构表达 LOB 内部依赖 & 作为结构先验例子 \\
-Benchmark Study & 说明单一数据集高分不可靠 & 作为泛化风险提醒 \\
+Microstructural Guide & Main paper: explains LOB predictability through market structure & Labels, tick regimes, MCC, and \(p_T\) \\
+DeepLOB & Canonical baseline: treats the LOB as a structured time series & Model principle, not engineering details \\
+Ait-Sahalia et al. & Shows short-lived high-frequency predictability & Why horizon and latency matter \\
+HLOB & Encodes structural dependence inside the book & Example of a stronger inductive bias \\
+Benchmark Study & Shows single-dataset scores are fragile & Generalization warning \\
 \bottomrule
 \end{tabularx}
 \end{frame}
@@ -173,6 +173,75 @@ X_\tau\in\mathbb{R}^{T\times4L}
 \end{block}
 \end{column}
 \end{columns}
+\end{frame}
+
+\begin{frame}[plain]
+\contentheader{Microstructure Model: A Jump Process}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.50\textwidth}
+\begin{itemize}\tightitems
+  \item A useful abstraction is a continuous-time state process:
+  \[
+    Q_t=(Q_t^{b,1},\ldots,Q_t^{b,L},Q_t^{a,1},\ldots,Q_t^{a,L}).
+  \]
+  \item Each coordinate is queue size at one bid/ask level.
+  \item Limit orders, market orders, and cancellations are jumps of \(Q_t\).
+\end{itemize}
+\end{column}
+\begin{column}{0.46\textwidth}
+\begin{block}{Point-process view}
+\[
+dQ_t=\sum_{e\in\mathcal{E}} \nu_e(Q_{t-})\,dN_t^e
+\]
+\[
+\mathbb{P}(dN_t^e=1\mid\mathcal{F}_{t-})
+\approx \lambda_e(Q_{t-})\,dt
+\]
+\end{block}
+\begin{block}{Intuition}
+The book is not a smooth curve; it is a queueing system hit by random order-flow events.
+\end{block}
+\end{column}
+\end{columns}
+\source{Cont and de Larrard (2013); Abergel and Jedidi (2013).}
+\end{frame}
+
+\begin{frame}[plain]
+\contentheader{Why This Model Explains Predictability}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{Price moves when a queue is depleted}
+\scriptsize
+\[
+\tau_a=\inf\{t:Q_t^{a,1}=0\}
+\]
+\[
+\tau_b=\inf\{t:Q_t^{b,1}=0\}
+\]
+\[
+\text{next move}=
+\begin{cases}
+\text{up}, & \tau_a<\tau_b,\\
+\text{down}, & \tau_b<\tau_a.
+\end{cases}
+\]
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{itemize}\tightitems
+  \item Queue imbalance is predictive because it changes depletion probabilities.
+  \[
+    I_t=\frac{Q_t^{b,1}-Q_t^{a,1}}{Q_t^{b,1}+Q_t^{a,1}}.
+  \]
+  \item Event clustering matters: order arrivals are often self- and cross-exciting.
+  \[
+    \lambda_i(t)=\mu_i+\sum_j\int_0^t \phi_{ij}(t-s)\,dN_j(s).
+  \]
+  \item Deep models are useful because they learn nonlinear approximations to these conditional probabilities.
+\end{itemize}
+\end{column}
+\end{columns}
+\source{Cont and de Larrard (2013); Bacry, Mastromatteo and Muzy (2015).}
 \end{frame}
 
 \begin{frame}[plain]
@@ -297,13 +366,16 @@ tick size 不只是交易所规则；它决定“价格动一下”在这个市�
 \begin{column}{0.44\textwidth}
 \begin{itemize}\tightitems
   \item 输入是 \(100\times40\)：100 次更新、10 档买卖盘价格和数量。
-  \item CNN：识别局部买卖盘形状。
-  \item Inception：同时看不同时间尺度的局部模式。
-  \item LSTM：把局部特征按时间串起来。
+  \item CNN：学习局部队列形状，例如 bid/ask imbalance 和 depth slope。
+  \item Inception：同时看不同尺度的短期 order-flow pattern。
+  \item LSTM：近似条件分布
+  \[
+    \mathbb{P}(y_{\tau}=c\mid X_\tau).
+  \]
 \end{itemize}
 \vspace{0.25em}
 \begin{block}{一句话}
-DeepLOB 的核心不是“网络很深”，而是给 LOB 的空间结构和时间结构一个合理的模型偏置。
+DeepLOB 好用，是因为它把随机队列过程的局部形状和短期路径依赖放进同一个函数近似器。
 \end{block}
 \end{column}
 \end{columns}
@@ -329,7 +401,7 @@ DeepLOB 的核心不是“网络很深”，而是给 LOB 的空间结构和时�
 它不只看“猜对多少”，还看各类之间怎么错。
 \end{block}
 \begin{block}{主论文发现}
-large-tick 股票在多个 horizon 上更稳定、更容易预测。
+large-tick 股票在多个 horizon 上更稳定、更容易预测；这说明 score 反映的是模型与市场结构的共同结果。
 \end{block}
 \end{column}
 \end{columns}
@@ -471,25 +543,41 @@ p_T=\frac{|P_T\cap T_T|}{|P_T\cup T_T|}
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{如果自己做 LOB 研究：入门步骤}
+\contentheader{Principle-First Research Logic}
 \begin{enumerate}\tightitems
-  \item 先定义标签：预测未来几次 LOB 更新后的中间价方向。
-  \item 再看市场结构：\(\bar{\sigma}/\theta\)、最优档深度、订单簿更新频率。
-  \item 先跑简单 baseline 和 DeepLOB，不急着上复杂模型。
-  \item 同时报告 accuracy/F1、MCC、覆盖率，以及类似 \(p_T\) 的路径级指标。
-  \item 最后做跨股票、跨 horizon、跨时间段验证。
+  \item Define the random object: state \(Q_t\), observation \(X_\tau\), and label \(y_\tau\).
+  \item Explain the market regime: \(\bar{\sigma}/\theta\), best-queue depth, imbalance, event intensity.
+  \item Choose a model bias that matches the object: local convolution, recurrence, graph structure, or point-process intensity.
+  \item Evaluate two levels: sample-wise correctness and path-wise tradability.
+  \item Test whether the explanation survives across stocks, horizons, and market regimes.
 \end{enumerate}
 \vspace{0.4em}
 \begin{block}{原则}
-模型复杂度应该服务于市场结构解释，而不是替代市场结构分析。
+Model complexity should serve a microstructure explanation; it should not replace one.
 \end{block}
+\end{frame}
+
+\begin{frame}[plain]
+\contentheader{Answers to the Opening Questions}
+\begin{enumerate}\tightitems
+  \item What is being predicted?\\
+  The future direction of the mid-price, usually after a fixed number of LOB updates:
+  \[
+    y_\tau=g_\theta(m_{\tau+\Delta\tau}-m_\tau).
+  \]
+  \item Why do tick size, spread, and horizon matter?\\
+  They change queue depletion probabilities, class balance, signal lifetime, and transaction-cost meaning.
+  \item Why is high accuracy not enough?\\
+  A trading signal is a time-ordered path. MCC/F1 count point errors, while \(p_T\) asks whether the predicted path completes the right trade.
+\end{enumerate}
 \end{frame}
 
 \begin{frame}[plain]
 \contentheader{最后的 takeaway}
 \begin{enumerate}\tightitems
   \item LOB 预测的核心对象是“订单簿状态序列”，不是单纯价格序列。
-  \item tick size 是理解可预测性的入口变量。
+  \item LOB 可以看成由订单到达、成交和撤单驱动的随机队列过程。
+  \item tick size 是理解可预测性的入口变量，因为它改变队列、价差和标签的尺度。
   \item DeepLOB 是一个好 baseline，但主论文强调的是何时有效、为什么有效。
   \item MCC 比准确率更适合不均衡分类；\(p_T\) 更贴近交易路径。
   \item 真实研究不能只看一个 benchmark 分数。
@@ -519,6 +607,9 @@ p_T=\frac{|P_T\cap T_T|}{|P_T\cup T_T|}
   \item A. Briola, S. Bartolucci, and T. Aste, ``Deep Limit Order Book Forecasting: A Microstructural Guide,'' Quantitative Finance, 2025.
   \item Z. Zhang, S. Zohren, and S. Roberts, ``Deep Learning for Limit Order Books,'' IEEE Transactions on Signal Processing, 2020.
   \item Y. Ait-Sahalia, I. Kalnina, and D. Xiu, ``How and When are High-Frequency Stock Returns Predictable?''
+  \item R. Cont and A. de Larrard, ``Price Dynamics in a Markovian Limit Order Market,'' SIAM Journal on Financial Mathematics, 2013.
+  \item F. Abergel and A. Jedidi, ``A Mathematical Approach to Order Book Modeling,'' International Journal of Theoretical and Applied Finance, 2013.
+  \item E. Bacry, I. Mastromatteo, and J.-F. Muzy, ``Hawkes Processes in Finance,'' Market Microstructure and Liquidity, 2015.
   \item A. Briola et al., ``Information Persistence and Structure in Limit Order Books.''
   \item ``LOB-Based Deep Learning Models: Benchmark Study.''
 \end{itemize}
