@@ -1,7 +1,7 @@
 # Deep Limit Order Book Forecasting 中文讲稿
 
-目标时长：约 30 分钟。
-讲法原则：少念公式，多讲直觉；少讲工程细节，多讲“这个对象是什么、为什么它会动、为什么模型这样设计、为什么高分不等于有用”。
+目标时长：约 32 分钟。
+讲法原则：少念公式，多讲直觉；少讲工程细节，多讲“这个对象是什么、为什么它会动、这个研究路线怎么发展、为什么模型结构合理、为什么高分不等于真的可执行”。
 
 ## 第 1 页：封面
 
@@ -23,7 +23,21 @@
 
 这一页请大家先记住三个问题。第一，LOB 预测模型到底在预测什么？它不是在看一条价格曲线然后猜涨跌，而是在给定订单簿状态的条件下，预测未来方向的概率。第二，为什么 tick size、spread 和预测 horizon 会改变难度？因为它们会改变“什么算一次价格变化”，也会改变交易摩擦。第三，为什么分类准确率高，不一定等于交易有效？因为交易看的是一整条路径，不是某个时间点单独对不对。后面所有内容，其实都在回答这三个问题。
 
-## 第 3 页：What the Model Actually Sees
+## 第 3 页：How LOB Research Evolved
+
+建议时长：1.5 分钟
+
+本页重点：DeepLOB 不是凭空出现的，它站在更早的一整条研究线上。
+
+讲稿：
+
+在正式讲 DeepLOB 之前，我想先给大家一条很短的历史线。最早人们会先把订单到达看成比较理想化的随机过程，比如 Poisson 这类思路，先解决“怎么把市场写成一个可分析对象”的问题。
+
+再往后，研究重点转向队列本身：买一卖一为什么会耗尽，价格为什么会在某一侧队列先空掉的时候跳动。再往后，大家发现订单流并不是独立随机点，它会聚集，会自激，会互相带动，这时候 Hawkes process 之类的点过程工具就变得很重要。
+
+所以这页最重要的一句话是：DeepLOB 不是替代了这些想法，而是建立在这些想法逐步澄清了“对象是什么、动态是什么”之后，开始直接对高维盘口历史做学习。
+
+## 第 4 页：What the Model Actually Sees
 
 建议时长：2 分钟
 
@@ -35,7 +49,7 @@
 
 所以模型看到的不是一根线，而是某个时刻买卖两侧队列的形状。更进一步，它看到的也不是单一快照，而是最近一小段历史。你可以把它想成一段“买卖盘状态的短电影”。这句话非常重要，因为后面的微观结构模型、DeepLOB 的网络设计、以及评价方式，全部都是围绕这个对象展开的。
 
-## 第 4 页：Why Prices Move: Queues Get Filled or Depleted
+## 第 5 页：Why Prices Move: Queues Get Filled or Depleted
 
 建议时长：2.5 分钟
 
@@ -49,7 +63,7 @@
 
 这里顺便解释一个很常见的概念：queue imbalance，也就是买一和卖一厚度不对称。如果买一很厚、卖一很薄，那下一步往上的概率往往更高。更严格的数学里，人们会用点过程、甚至 Hawkes process 去描述订单的聚集到达，但今天这场分享里，你只要记住一个直觉：价格变化和队列竞争强相关。
 
-## 第 5 页：Turning Market Dynamics into a Prediction Task
+## 第 6 页：Turning Market Dynamics into a Prediction Task
 
 建议时长：2 分钟
 
@@ -63,7 +77,7 @@
 
 这一页真正要传达的是：标签定义不是拍脑袋定出来的。它是从“队列如何导致未来价格变化”这个问题里抽象出来的。
 
-## 第 6 页：Why Use a Neural Network Here
+## 第 7 页：Why Use a Neural Network Here
 
 建议时长：2 分钟
 
@@ -77,7 +91,19 @@
 
 所以更准确的说法不是“随机模型不行，换黑箱”。而是：微观结构告诉我们该估计什么对象，神经网络提供了一个灵活的方法去逼近这个对象。也就是说，目标没变，路线变了。
 
-## 第 7 页：What the Main Paper Is Really Testing
+## 第 8 页：One Map of the Mathematical Story
+
+建议时长：1 分钟
+
+本页重点：把前面数学主线压缩成一张图。
+
+讲稿：
+
+到这里为止，我们其实只做了一件事：把对象、机制、标签和概率目标接起来。先有盘口状态，再有队列竞争，再有未来标签，再有条件概率目标，最后才轮到模型去逼近这个目标。
+
+所以这页不是新内容，而是一个路标。它提醒大家：后面无论讲 DeepLOB、讲主论文、讲评价指标，都是围绕这条主线展开，而不是突然换了一个问题。
+
+## 第 9 页：What the Main Paper Is Really Testing
 
 建议时长：1.5 分钟
 
@@ -91,19 +117,19 @@
 
 但这篇论文真正的问题，不是“DeepLOB 最终得了几分”。它更在意的是：什么样的市场结构让这个预测任务更容易，分类结果能不能形成真正有意义的交易路径，以及最后看到的分数到底是在反映模型能力，还是在反映微观结构本身。
 
-## 第 8 页：LOBFrame as a Controlled Experiment
+## 第 10 页：LOBFrame as a Controlled Experiment
 
-建议时长：1 分钟
+建议时长：0.75 分钟
 
 本页重点：LOBFrame 的价值在于把比较做公平。
 
 讲稿：
 
-这张图展示的是 LOBFrame。你可以把它理解成一个受控实验平台：同样的数据处理方式、同样的标签生成逻辑、同样的评价框架，然后去比较不同股票、不同 horizon、不同模型。
+这张图展示的是 LOBFrame。你可以把它理解成一个受控实验平台：尽量统一数据处理方式、标签生成逻辑和评价框架，再去比较不同股票、不同 horizon、不同模型。
 
-为什么这很重要？因为很多论文看起来都在做 LOB 预测，但其实数据集不同、标签定义不同、预测 horizon 不同、预处理不同，结果很难直接比较。LOBFrame 的意义，就是尽量把这些东西放到同一条流水线上，这样我们才有机会看清楚，差异到底来自模型，还是来自市场结构。
+这一页只要记住一句话：LOBFrame 的意义，是帮助我们分清楚，差异到底来自模型，还是来自市场结构。
 
-## 第 9 页：Tick Size Changes the Meaning of a Move
+## 第 11 页：Tick Size Changes the Meaning of a Move
 
 建议时长：2 分钟
 
@@ -117,7 +143,7 @@
 
 所以 tick size 不只是交易所规则。它会改变什么算“一次价格变化”，也会改变标签难度和交易摩擦含义。这也是为什么同一个模型，在不同股票上的表现会差很多。
 
-## 第 10 页：Why DeepLOB Fits the Structure of the Book
+## 第 12 页：Why DeepLOB Fits the Structure of the Book
 
 建议时长：2.5 分钟
 
@@ -135,7 +161,7 @@
 
 如果再用一句话总结它到底解决了什么，我会说：它没有解决所有问题，但它给这个方向提供了一个可复用模板。后面的很多工作，其实都是在这个模板上继续改。
 
-## 第 11 页：Why Accuracy Can Mislead
+## 第 13 页：Why Accuracy Can Mislead
 
 建议时长：1.5 分钟
 
@@ -149,7 +175,7 @@
 
 所以这里的 takeaway 是：高 accuracy 并不自动代表模型真的学到了有用结构。
 
-## 第 12 页：Performance Depends on Market Regime
+## 第 14 页：Performance Depends on Market Regime
 
 建议时长：1.5 分钟
 
@@ -163,7 +189,7 @@
 
 这其实是在提醒我们：不要把任何一个高分，理解成模型在所有市场里都强。
 
-## 第 13 页：A Good Classifier Is Not Always a Good Trading Signal
+## 第 15 页：A Good Classifier Is Not Always a Good Trading Signal
 
 建议时长：2 分钟
 
@@ -177,7 +203,21 @@
 
 所以这篇文章引入 \(p_T\) 这样的思路，去衡量预测路径和真实交易路径到底有多重合。公式本身你不需要记，真正要记的是：分类正确，不等于交易有效。
 
-## 第 14 页：What the Results Really Mean
+## 第 16 页：What Can an Execution System Borrow from This Literature?
+
+建议时长：2 分钟
+
+本页重点：不要把 DeepLOB 直接理解成“交易按钮”，而要理解成 execution signal 设计的灵感来源。
+
+讲稿：
+
+如果把话题往我们自己的 algo execution 再推进一步，一个很自然的问题就是：那我们到底能借什么？我觉得最值得借的，不是“把 DeepLOB 原样搬过去”，而是三类思想。
+
+第一，借 microstructure 的对象观。不要只看一条价格线，而要看 spread、queue imbalance、局部流动性状态、短期订单流压力。第二，借 DeepLOB 的结构观。模型应该尊重盘口这个对象本身的局部模式和短历史，而不是把它简单拍扁成一组 generic features。第三，借评价观。不要只问分类对不对，而要问这个信号在延迟、滑点、逆向选择之后还剩下多少经济价值。
+
+所以这里的 anchor 句是：真正可用的 execution signal，不只是模型意见，而是带着市场状态语义的行动建议。
+
+## 第 17 页：What the Results Really Mean
 
 建议时长：1.5 分钟
 
@@ -189,23 +229,21 @@
 
 这也是为什么这篇文章重要。它不是在说“我发明了一个更强的新模型”，而是在说：你看到的分数，必须放回市场微观结构里解释。不同股票不是同一个任务，不同 horizon 也不是同一个任务。这个视角，比单纯再卷一点模型结构更重要。
 
-## 第 15 页：Two Broader Lessons from the Literature
+## 第 18 页：Two Broader Lessons from the Literature
 
-建议时长：2 分钟
+建议时长：1.5 分钟
 
-本页重点：其他论文补上两件事：信号寿命很短，以及 benchmark/结构先验同样重要。
+本页重点：其他论文补上两件事：信号寿命很短，以及结构/benchmark 同样重要。
 
 讲稿：
 
 这一页把其他论文压缩成两个更大的教训。第一个教训来自 Aït-Sahalia 等人：高频市场里确实存在可预测性，但寿命很短，延迟和交易摩擦会迅速吃掉信号价值。所以 LOB 预测天然更适合很短 horizon。
 
-第二个教训来自 HLOB 和 benchmark 研究。HLOB 说明，市场结构信息不只是影响评价，还可以直接进入模型设计。Benchmark 研究则提醒我们：一个模型在某个数据集上高分，并不代表它在真实市场里也一样有效。
+第二个教训来自 HLOB 和 benchmark 研究。结构信息有时应该直接进入模型设计，而 benchmark 研究提醒我们：一个模型在某个数据集上高分，并不代表它在真实市场里也一样有效。
 
-换句话说，一个讲“信号有多短命”，一个讲“高分有多容易被误读”。
+## 第 19 页：Five Papers as One Map
 
-## 第 16 页：Five Papers as One Map
-
-建议时长：1.5 分钟
+建议时长：1.25 分钟
 
 本页重点：把五篇论文放回一条统一研究主线。
 
@@ -215,9 +253,9 @@
 
 所以这五篇论文不是在争谁更强，而是在共同回答一个更大的问题：LOB 预测到底什么时候有效，为什么有效，以及怎样才算真的有效。
 
-## 第 17 页：A Simple Workflow for Thinking About LOB Prediction
+## 第 20 页：A Simple Workflow for Thinking About LOB Prediction
 
-建议时长：1.5 分钟
+建议时长：1.25 分钟
 
 本页重点：给听众一个可带走的思考框架。
 
@@ -227,7 +265,7 @@
 
 这一页想传达的不是技术细节，而是一种研究习惯：模型复杂度应该服务于解释，而不是替代解释。
 
-## 第 18 页：Answers to the Opening Questions
+## 第 21 页：Answers to the Opening Questions
 
 建议时长：1.5 分钟
 
@@ -239,22 +277,39 @@
 
 所以今天真正的主结论不是“哪一个模型最强”，而是：在什么样的市场结构下，什么样的方向信号在什么 horizon 上可以被预测，而且这种预测能不能穿过交易摩擦，形成完整可用的交易路径。
 
-## 第 19 页：References and Figure Sources
+## 第 22 页：Core References by Theme
 
-建议时长：0.5 分钟
+建议时长：0.4 分钟
 
-本页重点：交代参考文献来源，结束。
+本页重点：按主题交代今天的知识来源，而不是平铺文献清单。
 
 讲稿：
 
-这里列出今天用到的主要论文和图表来源。主线以 Microstructural Guide 为中心，DeepLOB 提供经典模型，Aït-Sahalia 提供高频可预测性的时间边界，Cont-de Larrard、Abergel-Jedidi、Bacry 等提供微观结构建模背景，HLOB 和 benchmark study 分别补充结构先验和泛化视角。我的分享就到这里，欢迎大家提问。
+最后两页参考文献我做了一个更学术一点的整理。这里先按主题分组：微观结构基础、Deep LOB forecasting、经验约束，以及结构增强与 benchmark 延伸。这样大家在回看时会更清楚：今天每一部分的想法分别是从哪条文献线来的。
+
+## 第 23 页：Figure Sources and Additional Reading
+
+建议时长：0.4 分钟
+
+本页重点：单独交代图表来源和补充阅读。
+
+讲稿：
+
+这一页单独列图表来源和补充阅读。这样做的目的，不是把结尾变复杂，而是让整个 presentation 的资料来源更清楚、更专业。我的分享就到这里，欢迎大家提问。
 
 ## 时间分配汇总
 
-总计约 30 分钟。
+总计约 32 分钟。
 
-如果现场时间紧，可以压缩三处：
+如果现场时间紧，可以压缩四处：
 
-- 第 8 页 LOBFrame：压到 30 秒。
-- 第 15-16 页文献补充：各压到 1 分钟。
-- 第 19 页参考文献：直接略过，只说“参考文献如页所示”。
+- 第 10 页 LOBFrame：压到 30 秒。
+- 第 18 页文献补充：压到 1 分钟。
+- 第 19–20 页 synthesis/workflow：各压到 1 分钟。
+- 第 22–23 页参考文献：快速略过，只说“参考文献与图表来源如页所示”。
+
+## 讲者提醒
+
+- 不展开系统架构、消息格式、低延迟实现、撮合细节。
+- 第 16 页 practical slide 只讲“如何把微观结构 insight 变成更有经济意义的信号设计原则”。
+- 如果现场有人继续追问 execution engineering，再口头展开，不放进主线。
