@@ -145,13 +145,13 @@
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (b) -- (c);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (c) -- (d);
 \end{tikzpicture}
-\vspace{0.25em}
+\vspace{0.15em}
 \begin{block}{Why this history matters}
-DeepLOB did not appear out of nowhere. It arrived after the field learned to think in terms of queues, event dependence, and short-lived signals.
+DeepLOB arrived after the field learned to think in terms of queues, event dependence, and short-lived signals.
 \end{block}
 \end{column}
 \end{columns}
-\source{Cont and de Larrard (2013); Bacry et al. (2015); Zhang et al. (2020).}
+{\tiny\color{BrandGray}Source: Cont and de Larrard (2013); Bacry et al. (2015); Zhang et al. (2020).\par}
 \end{frame}
 
 \begin{frame}[plain]
@@ -285,22 +285,24 @@ Microstructure tells us what probability to estimate. Deep learning is a practic
 \begin{frame}[plain]
 \contentheader{One Map of the Mathematical Story}
 \centering
-\begin{tikzpicture}[node distance=0.55cm,every node/.style={font=\scriptsize}]
-\node[draw,rounded corners=2pt,fill=BrandOrangeLight,text width=4.6cm,align=center,inner sep=5pt] (a) {LOB state and short history \\ \(X_\tau\)};
-\node[draw,rounded corners=2pt,fill=white,text width=4.6cm,align=center,inner sep=5pt,right=of a] (b) {Queue competition \\ imbalance, depletion, event flow};
-\node[draw,rounded corners=2pt,fill=white,text width=4.6cm,align=center,inner sep=5pt,right=of b] (c) {Future label \\ direction after a chosen horizon};
-\node[draw,rounded corners=2pt,fill=white,text width=4.6cm,align=center,inner sep=5pt,below=of b] (d) {Conditional probability target \\ \(\mathbb{P}(y_\tau\mid X_\tau)\)};
-\node[draw,rounded corners=2pt,fill=white,text width=4.6cm,align=center,inner sep=5pt,left=of d] (e) {Learned approximation \\ DeepLOB, HLOB, related models};
-\node[draw,rounded corners=2pt,fill=white,text width=4.6cm,align=center,inner sep=5pt,right=of d] (f) {Evaluation \\ pointwise correctness and tradability};
+\resizebox{0.94\textwidth}{!}{%
+\begin{tikzpicture}[node distance=0.42cm,every node/.style={font=\scriptsize}]
+\node[draw,rounded corners=2pt,fill=BrandOrangeLight,text width=3.8cm,align=center,inner sep=4pt] (a) {LOB state and short history \\ \(X_\tau\)};
+\node[draw,rounded corners=2pt,fill=white,text width=3.8cm,align=center,inner sep=4pt,right=of a] (b) {Queue competition \\ imbalance, depletion, event flow};
+\node[draw,rounded corners=2pt,fill=white,text width=3.8cm,align=center,inner sep=4pt,right=of b] (c) {Future label \\ direction after a chosen horizon};
+\node[draw,rounded corners=2pt,fill=white,text width=3.8cm,align=center,inner sep=4pt,below=of b] (d) {Conditional target \\ \(\mathbb{P}(y_\tau\mid X_\tau)\)};
+\node[draw,rounded corners=2pt,fill=white,text width=3.8cm,align=center,inner sep=4pt,left=of d] (e) {Learned approximation \\ DeepLOB, HLOB, related models};
+\node[draw,rounded corners=2pt,fill=white,text width=3.8cm,align=center,inner sep=4pt,right=of d] (f) {Evaluation \\ correctness and tradability};
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (a) -- (b);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (b) -- (c);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (b) -- (d);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (d) -- (e);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (d) -- (f);
-\end{tikzpicture}
-\vspace{0.55em}
+\end{tikzpicture}%
+}
+\vspace{0.35em}
 \begin{block}{Checkpoint}
-We now have one chain: object, mechanism, label, and probability target. The rest of the talk asks which models and market regimes make that chain more predictable and more useful.
+One chain connects the talk: object, mechanism, label, probability target, and usefulness.
 \end{block}
 \end{frame}
 
