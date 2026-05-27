@@ -274,6 +274,9 @@ Microstructure tells us what probability to estimate. Deep learning is a practic
   \item Are the scores explained more by architecture, or by microstructure?
 \end{itemize}
 \end{block}
+\begin{block}{Why DeepLOB appears here}
+DeepLOB is the representative deep model in this literature: not just a high score, but a classic template for turning LOB states into a neural prediction pipeline.
+\end{block}
 \end{column}
 \end{columns}
 \vspace{0.35em}
@@ -341,10 +344,11 @@ Tick size is not only an exchange rule; it changes the economic meaning of what 
   \item CNN: finds local queue patterns such as imbalance and depth changes.
   \item Inception: looks at several short time scales in parallel.
   \item LSTM: keeps a short memory of recent order-flow history.
+  \item Why the field remembers it: it made deep learning on LOBs feel structurally plausible.
 \end{itemize}
 \vspace{0.2em}
-\begin{block}{Big idea}
-DeepLOB is trying to learn the same conditional probability that the microstructure story suggests.
+\begin{block}{Why it matters}
+DeepLOB became the classic starting point: later papers compare against it, modify it, or explain when it works.
 \end{block}
 \end{column}
 \end{columns}
