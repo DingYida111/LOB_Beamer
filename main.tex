@@ -268,40 +268,70 @@ y_\tau =
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{Where Analytic Models Break}
+\contentheader{The Equation We Would Like to Solve}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
-\begin{block}{The classical route}
+\begin{block}{A stochastic model gives the target}
+The queue model says that price direction is a conditional probability:
 \[
-\mathbb{P}(y_\tau=c\mid X_\tau)
+\mathbb{P}(y_\tau=c\mid X_\tau),
+\qquad c\in\{-1,0,+1\}.
 \]
-can be derived only after strong assumptions on event intensities, independence, stationarity, and low-dimensional state variables.
+Equivalently, at the best quotes:
+\[
+\mathbb{P}(\tau_a<\tau_b\mid\mathcal F_t).
+\]
 \end{block}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{block}{The empirical problem}
+\begin{block}{What closed form would require}
 \begin{itemize}\tightitems
-  \item Intensities change during the day.
-  \item Events are clustered and cross-exciting.
-  \item Ten levels produce a high-dimensional state.
-  \item Tick regime changes the meaning of the same move.
+  \item Known event intensities \(\lambda_e(Q_t)\).
+  \item A small enough state space for dynamic equations.
+  \item Stable parameters over time and across stocks.
+  \item Tractable dependence among order arrivals, trades, and cancellations.
 \end{itemize}
 \end{block}
 \end{column}
 \end{columns}
-\vspace{0.12em}
-\begin{block}{Statistical Estimation}
-\footnotesize
-Approximate the conditional distribution identified by the stochastic model:
+\vspace{0.25em}
+\begin{block}{Why this is hard in real data}
+Ten levels, intraday non-stationarity, event clustering, and tick-regime effects make the exact transition law too large and too unstable to solve directly.
+\end{block}
+\end{frame}
+
+\begin{frame}[plain]
+\contentheader{Learning as Conditional Probability Estimation}
+\begin{columns}[T,totalwidth=\textwidth]
+\begin{column}{0.48\textwidth}
+\begin{block}{Same target, different route}
+The stochastic model defines the object:
+\[
+\mathbb{P}(y_\tau\mid X_\tau).
+\]
+The neural network supplies a flexible approximation:
 \[
 f_\omega(X_\tau)\approx
-\big(\mathbb{P}(y_\tau=-1\mid X_\tau),\mathbb{P}(y_\tau=0\mid X_\tau),\mathbb{P}(y_\tau=1\mid X_\tau)\big).
+\begin{pmatrix}
+\mathbb{P}(y_\tau=-1\mid X_\tau)\\
+\mathbb{P}(y_\tau=0\mid X_\tau)\\
+\mathbb{P}(y_\tau=1\mid X_\tau)
+\end{pmatrix}.
 \]
-Cross-entropy is maximum likelihood for the categorical label:
+\end{block}
+\end{column}
+\begin{column}{0.48\textwidth}
+\begin{block}{Maximum likelihood}
+Cross-entropy is not just an engineering loss. It is maximum likelihood for the categorical direction label:
 \[
 \min_\omega -\sum_{\tau}\log f_\omega(X_\tau)_{y_\tau}.
 \]
 \end{block}
+\begin{block}{Connection}
+Stochastic modeling tells us what probability to estimate; machine learning estimates it without forcing a closed-form transition law.
+\end{block}
+\end{column}
+\end{columns}
 \end{frame}
 
 \section{Main Paper}
