@@ -37,7 +37,7 @@
   }
 \fi
 \renewcommand{\familydefault}{\sfdefault}
-\graphicspath{{figs/}}
+\graphicspath{{/Users/yidading/LOB_Beamer/figs/}{figs/}}
 
 \definecolor{BrandOrange}{RGB}{243,93,0}
 \definecolor{BrandOrangeDark}{RGB}{184,67,0}
@@ -97,24 +97,24 @@
 
 \section{Roadmap}
 \begin{frame}[plain]
-\contentheader{Opening Questions}
+\contentheader{Three Questions to Keep in Mind}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
 \begin{block}{Keep these in mind}
 \begin{itemize}\tightitems
   \item What exactly is a LOB forecasting model predicting?
   \item Why do tick size, spread, and horizon change the difficulty?
-  \item Why can a classifier be accurate but still be weak as a trading signal?
+  \item Why can a classifier look accurate but still be weak as a trading signal?
 \end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.48\textwidth}
 \centering
 \begin{tikzpicture}[node distance=0.62cm,every node/.style={font=\scriptsize}]
-\node[draw,rounded corners=2pt,fill=BrandOrangeLight,text width=4.7cm,align=center,inner sep=5pt] (a) {1. LOB as a mathematical object};
-\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of a] (b) {2. Stochastic microstructure};
-\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of b] (c) {3. DeepLOB and evaluation};
-\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of c] (d) {4. Answers and research logic};
+\node[draw,rounded corners=2pt,fill=BrandOrangeLight,text width=4.7cm,align=center,inner sep=5pt] (a) {1. What the model sees};
+\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of a] (b) {2. Why prices move};
+\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of b] (c) {3. Why DeepLOB can work};
+\node[draw,rounded corners=2pt,fill=white,text width=4.7cm,align=center,inner sep=5pt,below=of c] (d) {4. Why evaluation needs microstructure};
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (a) -- (b);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (b) -- (c);
 \draw[-{Stealth[length=2mm]},BrandOrange,thick] (c) -- (d);
@@ -125,117 +125,70 @@
 
 \section{LOB Basics}
 \begin{frame}[plain]
-\contentheader{The Object: A Queue-Shaped State}
+\contentheader{What the Model Actually Sees}
 \begin{columns}[T,totalwidth=\textwidth]
-\begin{column}{0.52\textwidth}
+\begin{column}{0.54\textwidth}
 \begin{itemize}\tightitems
   \item A LOB records resting buy and sell orders that have not yet traded.
   \item Each level has a price and a queue size: best ask, second ask, best bid, second bid, and so on.
-  \item Deep LOB models usually keep the first \(L=10\) levels and write one snapshot as a vector.
+  \item Deep LOB models usually keep the first \(L=10\) levels and the recent history of updates.
 \end{itemize}
-\vspace{0.3em}
-\begin{block}{One Snapshot}
-\[
-L(\tau)=
-\{p^{ask}_{\ell},v^{ask}_{\ell},p^{bid}_{\ell},v^{bid}_{\ell}\}_{\ell=1}^{L}
-\in\mathbb{R}^{4L}.
-\]
-\end{block}
-\end{column}
-\begin{column}{0.44\textwidth}
-\begin{block}{The Model's Observation}
+\vspace{0.25em}
+\begin{block}{What goes into the model}
 \[
 X_\tau =
-\big(L(\tau-T+1),\ldots,L(\tau)\big)
-\]
-\[
+\big(L(\tau-T+1),\ldots,L(\tau)\big),
+\qquad
 X_\tau\in\mathbb{R}^{T\times4L}
 \]
 \end{block}
-\begin{block}{What to Picture}
-The input is not a price line. It is a short movie of queue shapes on both sides of the market.
+\end{column}
+\begin{column}{0.40\textwidth}
+\begin{block}{Picture it this way}
+The input is not a price line.
+
+It is a short movie of queue shapes on both sides of the market.
+\end{block}
+\begin{block}{Why this matters}
+If the shape of the book changes, the next price move can change even before the trade happens.
 \end{block}
 \end{column}
 \end{columns}
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{A Queueing Model of the Book}
-\begin{columns}[T,totalwidth=\textwidth]
-\begin{column}{0.50\textwidth}
-\begin{itemize}\tightitems
-  \item A useful abstraction is a continuous-time state process:
-  \[
-    Q_t=(Q_t^{b,1},\ldots,Q_t^{b,L},Q_t^{a,1},\ldots,Q_t^{a,L}).
-  \]
-  \item Each coordinate is queue size at one bid/ask level.
-  \item Limit orders, market orders, and cancellations are jumps of \(Q_t\).
-\end{itemize}
-\end{column}
-\begin{column}{0.46\textwidth}
-\begin{block}{Point-process view}
-\[
-dQ_t=\sum_{e\in\mathcal{E}} \nu_e(Q_{t-})\,dN_t^e
-\]
-\[
-\mathbb{P}(dN_t^e=1\mid\mathcal{F}_{t-})
-\approx \lambda_e(Q_{t-})\,dt
-\]
-\end{block}
-\begin{block}{Mathematical Meaning}
-The book is not a smooth curve; it is a queueing system hit by random order-flow events.
-\end{block}
-\end{column}
-\end{columns}
-\source{Cont and de Larrard (2013); Abergel and Jedidi (2013).}
-\end{frame}
-
-\begin{frame}[plain]
-\contentheader{Price Changes as Queue Depletion}
+\contentheader{Why Prices Move: Queues Get Filled or Depleted}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
-\begin{block}{Price moves when a queue is depleted}
-\scriptsize
-\[
-\tau_a=\inf\{t:Q_t^{a,1}=0\}
-\]
-\[
-\tau_b=\inf\{t:Q_t^{b,1}=0\}
-\]
-\[
-\text{next move}=
-\begin{cases}
-\text{up}, & \tau_a<\tau_b,\\
-\text{down}, & \tau_b<\tau_a.
-\end{cases}
-\]
+\begin{block}{A useful first-principles picture}
+\begin{itemize}\tightitems
+  \item New limit orders add volume to a queue.
+  \item Market orders and cancellations remove volume from a queue.
+  \item When the best ask queue disappears first, price often moves up.
+  \item When the best bid queue disappears first, price often moves down.
+\end{itemize}
 \end{block}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{itemize}\tightitems
-  \item Queue imbalance is predictive because it changes depletion probabilities.
-  \[
-    I_t=\frac{Q_t^{b,1}-Q_t^{a,1}}{Q_t^{b,1}+Q_t^{a,1}}.
-  \]
-  \item Event clustering matters: order arrivals are often self- and cross-exciting.
-  \[
-    \lambda_i(t)=\mu_i+\sum_j\int_0^t \phi_{ij}(t-s)\,dN_j(s).
-  \]
-  \item Forecasting asks for conditional probabilities such as
-  \[
-    \mathbb{P}(\tau_a<\tau_b\mid\mathcal{F}_t).
-  \]
-\end{itemize}
+\begin{block}{Queue imbalance}
+\[
+I_t=\frac{Q_t^{b,1}-Q_t^{a,1}}{Q_t^{b,1}+Q_t^{a,1}}
+\]
+If the best bid queue is thick and the best ask queue is thin, the next move is more likely to be upward.
+\end{block}
+\begin{block}{Key intuition}
+Price changes are tied to queue competition, not just to a smooth price curve.
+\end{block}
 \end{column}
 \end{columns}
 \source{Cont and de Larrard (2013); Bacry, Mastromatteo and Muzy (2015).}
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{From Queue Dynamics to a Label}
+\contentheader{Turning Market Dynamics into a Prediction Task}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
-\begin{block}{Mid-Price and Spread}
+\begin{block}{Start from the mid-price}
 \[
 m_\tau=\frac{p^{ask}_{1}(\tau)+p^{bid}_{1}(\tau)}{2}
 \]
@@ -245,11 +198,11 @@ m_\tau=\frac{p^{ask}_{1}(\tau)+p^{bid}_{1}(\tau)}{2}
 \end{block}
 \begin{itemize}\tightitems
   \item \(m_\tau\): the reference price used to define direction.
-  \item \(\sigma_\tau\): the bid--ask spread, also a direct trading friction.
+  \item \(\sigma_\tau\): the spread, which is also trading friction.
 \end{itemize}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{block}{Three-Class Label}
+\begin{block}{Turn the future move into a label}
 \[
 y_\tau =
 \begin{cases}
@@ -260,56 +213,29 @@ y_\tau =
 \]
 \end{block}
 \begin{itemize}\tightitems
-  \item \(\theta\): tick size, the smallest admissible price change.
-  \item \(\Delta\tau\): a horizon in future LOB updates, not in fixed seconds.
+  \item \(\theta\): tick size.
+  \item \(\Delta\tau\): a horizon in future LOB updates, not fixed seconds.
 \end{itemize}
 \end{column}
 \end{columns}
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{The Equation We Would Like to Solve}
+\contentheader{Why Use a Neural Network Here}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
-\begin{block}{A stochastic model gives the target}
-The queue model says that price direction is a conditional probability:
+\begin{block}{The target is still probabilistic}
+What we want is a conditional probability:
 \[
 \mathbb{P}(y_\tau=c\mid X_\tau),
 \qquad c\in\{-1,0,+1\}.
 \]
-Equivalently, at the best quotes:
-\[
-\mathbb{P}(\tau_a<\tau_b\mid\mathcal F_t).
-\]
+The difficulty is that real order books are high-dimensional, noisy, and non-stationary.
 \end{block}
 \end{column}
-\begin{column}{0.48\textwidth}
-\begin{block}{What closed form would require}
-\begin{itemize}\tightitems
-  \item Known event intensities \(\lambda_e(Q_t)\).
-  \item A small enough state space for dynamic equations.
-  \item Stable parameters over time and across stocks.
-  \item Tractable dependence among order arrivals, trades, and cancellations.
-\end{itemize}
-\end{block}
-\end{column}
-\end{columns}
-\vspace{0.25em}
-\begin{block}{Why this is hard in real data}
-Ten levels, intraday non-stationarity, event clustering, and tick-regime effects make the exact transition law too large and too unstable to solve directly.
-\end{block}
-\end{frame}
-
-\begin{frame}[plain]
-\contentheader{Learning as Conditional Probability Estimation}
-\begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
 \begin{block}{Same target, different route}
-The stochastic model defines the object:
-\[
-\mathbb{P}(y_\tau\mid X_\tau).
-\]
-The neural network supplies a flexible approximation:
+A neural network gives a flexible approximation:
 \[
 f_\omega(X_\tau)\approx
 \begin{pmatrix}
@@ -319,16 +245,8 @@ f_\omega(X_\tau)\approx
 \end{pmatrix}.
 \]
 \end{block}
-\end{column}
-\begin{column}{0.48\textwidth}
-\begin{block}{Maximum likelihood}
-Cross-entropy is not just an engineering loss. It is maximum likelihood for the categorical direction label:
-\[
-\min_\omega -\sum_{\tau}\log f_\omega(X_\tau)_{y_\tau}.
-\]
-\end{block}
-\begin{block}{Connection}
-Stochastic modeling tells us what probability to estimate; machine learning estimates it without forcing a closed-form transition law.
+\begin{block}{Big idea}
+Microstructure tells us what probability to estimate. Deep learning is a practical way to estimate it from rich queue history.
 \end{block}
 \end{column}
 \end{columns}
@@ -336,7 +254,7 @@ Stochastic modeling tells us what probability to estimate; machine learning esti
 
 \section{Main Paper}
 \begin{frame}[plain]
-\contentheader{The Microstructural Guide's Test}
+\contentheader{What the Main Paper Is Really Testing}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
 \begin{block}{Empirical setup}
@@ -349,11 +267,11 @@ Stochastic modeling tells us what probability to estimate; machine learning esti
 \end{block}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{block}{Conceptual question}
+\begin{block}{Real question}
 \begin{itemize}\tightitems
-  \item Which market regimes make the conditional distribution easier to learn?
+  \item Which market regimes make the task easier or harder?
   \item Does good classification imply a usable trading path?
-  \item Are results explained by model architecture, or by microstructure?
+  \item Are the scores explained more by architecture, or by microstructure?
 \end{itemize}
 \end{block}
 \end{column}
@@ -379,7 +297,7 @@ Stochastic modeling tells us what probability to estimate; machine learning esti
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{Tick Size Sets the Scale}
+\contentheader{Tick Size Changes the Meaning of a Move}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.50\textwidth}
 \begin{block}{Classify by spread relative to tick}
@@ -403,15 +321,15 @@ Stochastic modeling tells us what probability to estimate; machine learning esti
   \item The same label rule therefore creates different learning problems across stocks.
 \end{itemize}
 \vspace{0.25em}
-\begin{block}{Scale of a Price Move}
-Tick size is not only an exchange rule; it sets the economic meaning of ``one move'' in that market.
+\begin{block}{Big takeaway}
+Tick size is not only an exchange rule; it changes the economic meaning of what counts as ``one move.''
 \end{block}
 \end{column}
 \end{columns}
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{DeepLOB as a Conditional-Probability Machine}
+\contentheader{Why DeepLOB Fits the Structure of the Book}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.52\textwidth}
 \includegraphics[width=\textwidth,height=0.60\textheight,keepaspectratio]{deeplob_arch_fig3.png}
@@ -420,51 +338,20 @@ Tick size is not only an exchange rule; it sets the economic meaning of ``one mo
 \begin{column}{0.44\textwidth}
 \begin{itemize}\tightitems
   \item Input \(X_\tau\): recent snapshots of the queueing system.
-  \item CNN: local filters for bid--ask imbalance, queue depth, and depth slope.
-  \item Inception: several filter widths, i.e. several local time scales.
-  \item LSTM: summarizes path dependence in recent order-flow history.
+  \item CNN: finds local queue patterns such as imbalance and depth changes.
+  \item Inception: looks at several short time scales in parallel.
+  \item LSTM: keeps a short memory of recent order-flow history.
 \end{itemize}
-\vspace{0.25em}
-\begin{block}{Output}
-\[
-\mathrm{softmax}(h_\omega(X_\tau))_c
-\approx \mathbb{P}(y_\tau=c\mid X_\tau)
-\]
+\vspace{0.2em}
+\begin{block}{Big idea}
+DeepLOB is trying to learn the same conditional probability that the microstructure story suggests.
 \end{block}
 \end{column}
 \end{columns}
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{Why These Layers Fit the Book}
-\begin{columns}[T,totalwidth=\textwidth]
-\begin{column}{0.48\textwidth}
-\begin{block}{Convolution and Scale}
-Parameter sharing says: the same local pattern can matter at many recent times.
-\[
-z_{t,k}=\phi\!\left(\sum_{a,b}W_{a,b,k}X_{t+a,b}\right)
-\]
-Inception repeats this idea with several window widths.
-\end{block}
-\end{column}
-\begin{column}{0.48\textwidth}
-\begin{block}{Recurrence}
-The state is not Markov after compression; recent event history still matters.
-\[
-h_t=\Psi_\omega(z_t,h_{t-1})
-\]
-LSTM is a learnable memory for this missing path information.
-\end{block}
-\end{column}
-\end{columns}
-\vspace{0.35em}
-\begin{block}{Why the Architecture Is Reasonable}
-DeepLOB is a numerical approximation to the conditional probabilities suggested by queueing and point-process models.
-\end{block}
-\end{frame}
-
-\begin{frame}[plain]
-\contentheader{MCC: Correlation Instead of Raw Accuracy}
+\contentheader{Why Accuracy Can Mislead}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
 \begin{itemize}\tightitems
@@ -490,7 +377,7 @@ The score measures model quality under a specific market regime, not model quali
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{Tick Regime Changes the Score}
+\contentheader{Performance Depends on Market Regime}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.54\textwidth}
 \includegraphics[width=\textwidth,height=0.62\textheight,keepaspectratio]{lobframe_mcc_fig10.png}
@@ -508,28 +395,22 @@ The score measures model quality under a specific market regime, not model quali
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{\(p_T\): From Labels to Trading Paths}
+\contentheader{A Good Classifier Is Not Always a Good Trading Signal}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
 \begin{itemize}\tightitems
-  \item F1/MCC are pointwise: each timestamp is scored separately.
+  \item F1 and MCC are pointwise: each timestamp is scored separately.
   \item Trading is pathwise: entry, holding, and exit must line up.
-  \item An error near an exit point is more costly than an error in a flat region.
+  \item An error near an exit point can matter much more than an error in a flat region.
 \end{itemize}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{block}{Complete-trade probability}
-\[
-\begin{aligned}
-P_T&=\text{predicted trade set},\\
-T_T&=\text{true trade set}.
-\end{aligned}
-\]
+\begin{block}{Complete-trade overlap}
 \[
 p_T=\frac{|P_T\cap T_T|}{|P_T\cup T_T|}
 \]
 \end{block}
-\begin{block}{Path-Level Meaning}
+\begin{block}{Path-level meaning}
 \(p_T\) asks whether the predicted sequence forms the right complete trade, not just whether isolated labels are correct.
 \end{block}
 \end{column}
@@ -537,7 +418,7 @@ p_T=\frac{|P_T\cap T_T|}{|P_T\cup T_T|}
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{Microstructure Explains the Scores}
+\contentheader{What the Results Really Mean}
 \begin{enumerate}\tightitems
   \item LOB predictability is jointly determined by the model, label, horizon, and tick regime.
   \item Large-tick stocks are often easier: spreads are tight, best queues are thick, and queue changes carry more information.
@@ -552,59 +433,34 @@ Read each score together with the market structure that produced it.
 
 \section{Other Papers}
 \begin{frame}[plain]
-\contentheader{Where Predictability Comes From}
+\contentheader{Two Broader Lessons from the Literature}
 \begin{columns}[T,totalwidth=\textwidth]
 \begin{column}{0.48\textwidth}
-\begin{block}{Ait-Sahalia et al.}
+\begin{block}{Lesson 1: Predictability is short-lived}
 \begin{itemize}\tightitems
-  \item High-frequency returns and directions do contain short-lived predictability.
-  \item Latency quickly consumes the value of the signal.
-  \item Role here: explain why LOB forecasting lives at very short horizons.
+  \item Ait-Sahalia et al. show that high-frequency predictability exists, but it decays quickly.
+  \item Latency and trading frictions consume the value of the signal very fast.
+  \item Role here: explain why LOB forecasting usually lives at very short horizons.
 \end{itemize}
 \end{block}
+\vspace{0.25em}
+\centering
+\includegraphics[width=\textwidth,height=0.23\textheight,keepaspectratio]{ait_delay_fig14.png}
 \end{column}
 \begin{column}{0.48\textwidth}
-\begin{block}{DeepLOB}
+\begin{block}{Lesson 2: Structure and benchmarks matter}
 \begin{itemize}\tightitems
-  \item A standard CNN + Inception + LSTM architecture.
-  \item Role here: provide the baseline used by the main paper.
-  \item Limitation: architecture alone does not solve transferability or tradability.
+  \item HLOB shows how structural dependence can enter model design.
+  \item Benchmark studies show that high scores on one dataset may not transfer.
+  \item Role here: motivate structure-aware models and cross-market validation.
 \end{itemize}
 \end{block}
+\vspace{0.25em}
+\centering
+\includegraphics[width=\textwidth,height=0.23\textheight,keepaspectratio]{benchmark_table2.png}
 \end{column}
 \end{columns}
-\vspace{0.35em}
-\centering
-\includegraphics[width=0.68\textwidth,height=0.30\textheight,keepaspectratio]{ait_delay_fig14.png}
-\source{Ait-Sahalia, Kalnina and Xiu, Figure 14.}
-\end{frame}
-
-\begin{frame}[plain]
-\contentheader{Structure and Generalization}
-\begin{columns}[T,totalwidth=\textwidth]
-\begin{column}{0.48\textwidth}
-\begin{block}{HLOB}
-\begin{itemize}\tightitems
-  \item DeepLOB emphasizes local convolutional structure.
-  \item HLOB uses a graph to encode dependence among LOB variables.
-  \item Role here: show how market structure can enter the model design.
-\end{itemize}
-\end{block}
-\end{column}
-\begin{column}{0.48\textwidth}
-\begin{block}{Benchmark Study}
-\begin{itemize}\tightitems
-  \item A high score on FI-2010 does not guarantee real-market transfer.
-  \item Model ranking changes with dataset and horizon.
-  \item Role here: motivate cross-stock and cross-market validation.
-\end{itemize}
-\end{block}
-\end{column}
-\end{columns}
-\vspace{0.35em}
-\centering
-\includegraphics[width=0.76\textwidth,height=0.30\textheight,keepaspectratio]{benchmark_table2.png}
-\source{``LOB-Based Deep Learning Models: Benchmark Study'', Table 2.}
+\source{Ait-Sahalia, Kalnina and Xiu, Figure 14; ``LOB-Based Deep Learning Models: Benchmark Study'', Table 2.}
 \end{frame}
 
 \section{Synthesis}
@@ -616,7 +472,7 @@ Read each score together with the market structure that produced it.
 \end{frame}
 
 \begin{frame}[plain]
-\contentheader{A Coherent Workflow}
+\contentheader{A Simple Workflow for Thinking About LOB Prediction}
 \begin{enumerate}\tightitems
   \item Define the random object: state \(Q_t\), observation \(X_\tau\), and label \(y_\tau\).
   \item Explain the market regime: \(\bar{\sigma}/\theta\), best-queue depth, imbalance, event intensity.
